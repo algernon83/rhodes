@@ -88,9 +88,6 @@ end
       end
 
       def get_blob_path(relative_path)
-      
-        return relative_path if relative_path.start_with?('file://')
-        
         cur_dir = __rhoGetCurrentDir()
           if System::get_property('platform') == 'APPLE'
                  cur_dir = __rhoGetDBDir()

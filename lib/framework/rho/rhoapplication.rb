@@ -210,42 +210,20 @@ module Rho
       
     end
 
-    @@current_controller = nil
-    def self.current_controller()
-        @@current_controller        
-    end
-    def self.set_current_controller(ctrl)
-        @@current_controller = ctrl
-    end
-    
     def serve(req,res)
       req[:modelpath] = self.class.get_model_path req['application'], req['model']
       controller_class = req['model']+'Controller'
       undercase = controller_class.split(/(?=[A-Z])/).map{|w| w.downcase}.join("_")
 	  undercase.slice!(0) if undercase.start_with?('_')
 	  #TODO: WP7 - for some reason it added _ at the start
-
-      is_found = false  	  	
-      
+	  	
       if Rho::file_exist?(  req[:modelpath]+ undercase +RHO_RB_EXT )
         require req['model'] + '/' + undercase #req[:modelpath]+ undercase
-        
-        is_found = true
-      elsif defined?( RHODES_EMULATOR )
-        begin
-            require req['model'] + '/' + undercase #req[:modelpath]+ undercase
-            is_found = true
-        rescue Exception => exc
-        end
-        
-      end
-      
-      unless is_found
+      else
         require req['model'] + '/controller' #req[:modelpath]+'controller'
       end
       
-      @@current_controller = (Object.const_get(req['model']+'Controller').new) 
-      res['request-body'] = @@current_controller.send :serve, self, @rhom, req, res
+      res['request-body'] = (Object.const_get(req['model']+'Controller').new).send :serve, self, @rhom, req, res
     end
 
   end # RhoApplication

@@ -47,7 +47,7 @@ module LocalizationSimplified
 if defined?( RHODES_EMULATOR )        
             file = File.join( __rhoGetRhodesDir(), 'lib/framework', file)
 else
-            file = File.join( __rhoGetRuntimeDir(), 'lib', file)
+            file = File.join( __rhoGetCurrentDir(), 'lib', file)            
 end            
         end
 

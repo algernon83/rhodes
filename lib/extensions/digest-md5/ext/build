@@ -7,6 +7,6 @@ rake --trace
 
 else
 
-rake
+rake --trace
 
 fi

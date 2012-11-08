@@ -34,10 +34,6 @@ SYNC_SERVER_BASE_URL = 'http://rhoconnect-spec-exact_platform.heroku.com'
 SYNC_SERVER_CONSOLE_LOGIN = 'rhoadmin'
 SYNC_SERVER_CONSOLE_PASSWORD = ''
 
-BULK_SYNC_SERVER_URL = 'http://store-bulk.rhohub.com'
-BULK_SYNC_SERVER_CONSOLE_LOGIN = 'rhoadmin'
-BULK_SYNC_SERVER_CONSOLE_PASSWORD = ''
-
 class Hash
   def fetch_r(key)
     if self.has_key?(key) and not self[key].is_a?(Hash)
@@ -157,74 +153,46 @@ class Jake
     require 'rest_client'
     require 'json'
 
-    begin
-        platform = platform
-        exact_url = SYNC_SERVER_BASE_URL.gsub(/exact_platform/, platform)
-        puts "going to reset server: #{exact_url}"
-        # login to the server
-        unless @srv_token			
-		  @srv_token = RestClient.post("#{exact_url}/rc/v1/system/login", { :login => SYNC_SERVER_CONSOLE_LOGIN, :password => SYNC_SERVER_CONSOLE_PASSWORD }.to_json, :content_type => :json)
-        end
-        # reset server
-        RestClient.post("#{exact_url}/api/reset", {:api_token => @srv_token}.to_json, :content_type => :json)
-		puts "reset OK"
-    rescue Exception => e
-      puts "reset_spec_server failed: #{e}"
-    end        
-  end
-
-  def self.reset_bulk_server()
-	require 'rest_client'
-	require 'json'
-	
-	begin
-		platform = platform
-		exact_url = BULK_SYNC_SERVER_URL
-		puts "going to reset server: #{exact_url}"
-		# login to the server
-		unless @bulk_srv_token
-			@bulk_srv_token = RestClient.post("#{exact_url}/rc/v1/system/login", { :login => BULK_SYNC_SERVER_CONSOLE_LOGIN, :password => BULK_SYNC_SERVER_CONSOLE_PASSWORD }.to_json, :content_type => :json)
-		end
-		RestClient.post("#{exact_url}/api/reset", {:api_token => @bulk_srv_token}.to_json, :content_type => :json)
-		puts "reset OK"
-    rescue Exception => e
-		puts "reset_bulk_server failed: #{e}"
-	end        
+    platform = platform
+    exact_url = SYNC_SERVER_BASE_URL.gsub(/exact_platform/, platform)
+    puts "going to reset server: #{exact_url}"
+    # login to the server
+    unless @srv_token
+      result = RestClient.post("#{exact_url}/login",
+                           {:login => SYNC_SERVER_CONSOLE_LOGIN, :password => SYNC_SERVER_CONSOLE_PASSWORD}.to_json,
+                           :content_type => :json)
+      srv_session_cookie = 'rhoconnect_session=' + result.cookies['rhoconnect_session']
+      @srv_token = RestClient.post("#{exact_url}/api/get_api_token", '', {'Cookie' => srv_session_cookie})
+    end
+    # reset server
+    RestClient.post("#{exact_url}/api/reset", {:api_token => @srv_token}.to_json, :content_type => :json)
   end
 
   def self.run_spec_app(platform,appname)
     reset_spec_server(platform) if appname =~ /phone_spec/
-	reset_bulk_server
 
     rhobuildyml = File.join(basedir,'rhobuild.yml')
-    #rhobuild = YAML::load_file(rhobuildyml)
-    #rhobuild['env']['app'] = app_expanded_path(appname)
-    #File.open(rhobuildyml,'w') {|f| f.write rhobuild.to_yaml}
+    rhobuild = YAML::load_file(rhobuildyml)
+    rhobuild['env']['app'] = app_expanded_path(appname)
+    File.open(rhobuildyml,'w') {|f| f.write rhobuild.to_yaml}
     $app_path = File.expand_path(File.join(basedir,'spec',appname))
     $app_config = Jake.config(File.open(File.join($app_path, "build.yml")))
     $config = Jake.config(File.open(rhobuildyml,'r'))
 
-    if appname =~ /phone_spec/
-        server, addr, port = run_local_server
-        File.open(File.join($app_path, 'app', 'local_server.rb'), 'w') do |f|
-          f.puts "SPEC_LOCAL_SERVER_HOST = '#{addr}'"
-          f.puts "SPEC_LOCAL_SERVER_PORT = #{port}"
-        end
-        if File.exists?(File.join($app_path, 'server.rb'))
-          $local_server = server
-          require File.join($app_path, 'server.rb')
-        end
+    server, addr, port = run_local_server
+    File.open(File.join($app_path, 'app', 'local_server.rb'), 'w') do |f|
+      f.puts "SPEC_LOCAL_SERVER_HOST = '#{addr}'"
+      f.puts "SPEC_LOCAL_SERVER_PORT = #{port}"
     end
-    
+    if File.exists?(File.join($app_path, 'server.rb'))
+      $local_server = server
+      require File.join($app_path, 'server.rb')
+    end
     begin
       Rake::Task.tasks.each { |t| t.reenable }
       Rake::Task['run:' + platform + ':spec'].invoke
     ensure
-    
-      if appname =~ /phone_spec/
-        server.shutdown
-      end
-        
+      server.shutdown
     end
     
     $failed.to_i
@@ -529,7 +497,7 @@ class Jake
     old_content = File.exists?(file_name) ? File.read(file_name) : ""
 
     if old_content != content  
-        puts "!!!MODIFY #{file_name}"      
+        puts "Modify #{file_name}"      
         File.open(file_name, "w"){|file| file.write(content)}
     end
     
@@ -559,7 +527,7 @@ class Jake
   end
 
   def self.zip_upgrade_bundle(folder_path, zip_file_path)
-
+     
       File.delete(zip_file_path) if File.exists?(zip_file_path)
 
       currentdir = Dir.pwd()
@@ -577,7 +545,7 @@ class Jake
           Zip::ZipFile.open(zip_file_path, Zip::ZipFile::CREATE)do |zipfile|
             Find.find("RhoBundle") do |path|
               Find.prune if File.basename(path)[0] == ?.
-              next if path.start_with?("RhoBundle/lib") || path.start_with?("RhoBundle/db") || path == 'RhoBundle/hash' || path == 'RhoBundle/name'
+              next if path.start_with?("RhoBundle/lib") || path.start_with?("RhoBundle/db")
               
               puts "add to zip : #{path}"
               zipfile.add(path, path)
@@ -591,17 +559,16 @@ class Jake
       else
         #chdir folder_path
         temp_dir = folder_path + '_tmp'
-        mkdir_p temp_dir
-        cp_r 'RhoBundle', temp_dir
+        cp_r folder_path, temp_dir
         chdir temp_dir         
-        rm_rf File.join(temp_dir, 'RhoBundle/lib')
-        rm_rf File.join(temp_dir, 'RhoBundle/db')
-        rm_rf File.join(temp_dir, 'RhoBundle/hash')
-        rm_rf File.join(temp_dir, 'RhoBundle/name')
+        rm_rf File.join(temp_dir, 'RhoBundle/lib')         
+        rm_rf File.join(temp_dir, 'RhoBundle/db')         
+        rm_rf File.join(temp_dir, 'RhoBundle/hash')         
+        rm_rf File.join(temp_dir, 'RhoBundle/name')         
         sh %{zip -r temporary_archive.zip .}
         cp_r 'temporary_archive.zip', zip_file_path
-        rm_rf 'temporary_archive.zip'
-        rm_rf temp_dir
+        rm_rf 'temporary_archive.zip'          
+        rm_rf temp_dir          
       end
       
       Dir.chdir currentdir
@@ -611,7 +578,8 @@ class Jake
   def self.run_rho_log_server(app_path)
 
 	confpath_content = File.read($srcdir + "/apps/rhoconfig.txt") if File.exists?($srcdir + "/apps/rhoconfig.txt")
-	confpath_content += "\r\n" + "rhologurl=http://" + $rhologhostaddr + ":" + $rhologhostport.to_s() if !confpath_content.include?("rhologurl=")
+	confpath_content += "\r\n" + "rhologhost=" + $rhologhostaddr
+	confpath_content += "\r\n" + "rhologport=" + $rhologhostport.to_s()
 	File.open($srcdir + "/apps/rhoconfig.txt", "w") { |f| f.write(confpath_content) }  if confpath_content && confpath_content.length()>0
   
     begin
@@ -641,7 +609,7 @@ class Jake
         puts "EXC: #{e}"
     end    
   
-    system("START rake run:webrickrhologserver[\"#{app_path}\"]")
+    system("START rake run:webrickrhologserver[#{app_path}]")
   end
     
 end

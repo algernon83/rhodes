@@ -21,8 +21,6 @@ platform/iphone/Tests/build/*
 platform/iphone/curl/build/*
 lib/extensions/barcode/ext/barcode/platform/iphone/build/*
 lib/extensions/esri/ext/esri/platform/iphone/build/*
-lib/extensions/zlib/ext/iphone/build/*
-lib/extensions/openssl.so/wm/tmp/*
 platform/shared/*/iphone/*/build/*
 platform/shared/*/iphone/build/*
 platform/iphone/bin/*
@@ -35,21 +33,18 @@ platform/win32/bin/*
 platform/shared/*/win32/bin/*
 platform/wm/target/*
 platform/wm/build/cleanup.js
-platform/wm/build/regs.txt
 platform/iphone/*/rholog.txt
 platform/win32/**/*.pch
+platform/win32/RhoSimulator
 platform/wm/**/*.pch
 platform/wp7/bin/*
+platform/wp7/IronRuby/bin/*
 platform/wp7/WPApplication/rho/*
 platform/wp7/WPApplication/obj/*
 platform/wp7/WPApplication/Bin/*
 platform/wp7/*.sdf
 platform/wp7/rhodes/obj/*
 platform/wp7/**/obj/*
-platform/wp7/IronRuby/bin/Silverlight3Debug
-platform/wp8/bin/*
-platform/wp8/*/obj/*
-platform/wp8/ipch/*
 platform/symbian/rhodes/apps/*
 platform/symbian/rhodes/db/*
 platform/symbian/rhodes/lib/*
@@ -180,8 +175,7 @@ platform/android/**/default.properties
 *.user
 *.pdb
 *.idb
-*.sdf
-*.opensdf
+*.lib
 
 *.mode1v3
 *.mode2v3
@@ -203,7 +197,6 @@ spec/phone_spec/last_bbver
 
 platform/shared/curl/lib/rhoconf.h
 .idea
-.project
 #*.plist
 #Info.plist
 
@@ -221,6 +214,7 @@ Manifest.java
 platform/shared/qt/rhodes/GeneratedFiles/*
 platform/shared/qt/*/Makefile*
 platform/shared/qt/Makefile*
+platform/osx/bin/*
 platform/shared/qtrhodes/generatedfiles/*
 platform/wm/rhodes/emulator/generatedfiles/*
 platform/shared/RhoSimulator-build*
@@ -236,13 +230,3 @@ platform/wm/tools/Debug/*
 platform/wm/tools/Release/*
 platform/wm/tools/detool/Debug/*
 platform/wm/tools/detool/Release/*
-rhosetup.lib
-
-platform/osx/bin/curl/*
-platform/osx/bin/extensions/*
-platform/osx/bin/rholib/*
-platform/osx/bin/rubylib/*
-platform/osx/bin/sqlite3/*
-platform/osx/bin/syncengine/*
-platform/osx/bin/RhoSimulator/generated_files/*
-platform/osx/bin/RhoSimulator/tmp/*

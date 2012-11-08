@@ -153,37 +153,33 @@ end
 
 end
 =end
-module RhoLog
-	def self.info(cat, msg)
+class RhoLog
+    def initialize
+	end
+
+	def write(msg)
+		puts msg
+	end
+	def print(msg)
+		puts msg
+	end
+	def info(cat, msg)
 		puts cat + ":" + msg
 	end
-	
-	def self.error(cat, msg)
+	def error(cat, msg)
 		puts "ERROR:" + cat + ":" + msg
 	end
 	
-end
-
-module RhoProfiler
-	def self.create_counter(name)
-		
-	end
-	def self.destroy_counter(name)
-		
+	def debug(cat, msg)
+		puts "DEBUG:" + cat + ":" + msg
 	end
 	
-	def self.start_counter(name)
+	def flush
 	end
-	
-	def self.stop_counter(name)
+	def fileno
+		0
 	end
-	
-	def self.flush_counter(name, msg)
-		
+	def to_i
+		0
 	end
-	
-	def self.start_created_counter(name)
-		
-	end
-	
 end

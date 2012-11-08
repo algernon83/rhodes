@@ -82,10 +82,6 @@ module Kernel
 		""
 	end
 
-	def __rhoGetRuntimeDir
-		""
-	end
-
 	alias :orig_require :require
 
 	def require(file_name)

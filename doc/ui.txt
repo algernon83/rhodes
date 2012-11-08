@@ -100,7 +100,7 @@ Rhodes 2.0+ includes an improved [CSS Framework](css-framework) which takes adva
 To implement advanced UI for your Rhodes View you may consider using such JavaScript UI frameworks as [Sencha](http://www.sencha.com/). Place one of these libraries in public/js folder of your application, load it in your [layout.erb](#layout), and you are ready to go.
 [Jquery Mobile](http://jquerymobile.com/) is supported out of the box.
 
-Rhodes support for [jQTouch library](http://jqtouch.com/) has been dropped, here you can find instructions on [how to transit your legacy Rhodes application from jQTouch to jQuery Mobile](jqt-jqm-transition).
+Rhodes support for [jQTouch library](http://jqtouch.com/) has been dropped, here you can find instructions on [how to transit your legacy Rhodes application fom jQTouch to jQuery Mobile](jqt-jqm-transition).
 
 ### jQuery Mobile modifications
 
@@ -162,64 +162,6 @@ In case of problems with pages transition performance just uncomment appropriate
 
 You may find it at very end of *mobileinit* handler function.
 
-#### jQueryMobile CSS issues on Windows Phone 7.0
-In case you have jQueryMobile rendering broken on Windows Phone 7.0 you need to add this tag inside of *<head>* tag in *layout.erb* file:
-
-    :::html
-    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-
-It should fix jQueryMobile rendering problems on Windows Phone 7.0 platform.
-
-#### White page flickering while transition
-It may happen if controller action method doesn't return any rendered value but performs [WebView.navigate(someUrl)](#control-webview-from-controller-actions) call instead.
-It is important to avoid using [WebView.navigate](#control-webview-from-controller-actions) in action methods because it is intended to be used in callback methods asynchronously.
-
-#### How to make an AJAX call and update page elements
-When one need to update some information on the page without any transition an AJAX call may be performed this way:
-
-    :::html
-    <div data-role="page">
-
-      <div data-role="header" data-position="inline">
-        <h1>AJAX sample</h1>
-      </div>
-
-      <div data-role="content">
-        <ul data-role="listview">
-          <li><p>To reset result just reload the page..</p></li>
-          <li>
-            <a href="#"
-               onclick="$.get('<%= url_for :action => :get_json %>').success(function(data){showResult(data)}); return false;">
-                    Read JSON object via AJAX call
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <div>A = <span id="result_a"></span></div>
-      <div>B = <span id="result_b"></span></div>
-      <div>C = <span id="result_c"></span></div>
-
-    </div>
-
-To handle AJAX request a controller action method can return JSON object this way:
-
-    ::::ruby
-    def get_json
-      render :string => '{"a": 1, "b": 2, "c": 3}'
-    end
-
-**NOTE: It is very important to don't use [WebView.execute_js](#control-webview-from-controller-actions) method to update some page elements.
-See next section for details.
-
-#### Improper using of WebView.execute_js method
-At the moment for most of mobile platforms it has been implemented via redirection to URL with 'javascript:' schema.
-
-In case it used in some AJAX call handler method in the controller it may lead to the situation where *success* javascript handler will never be executed.
-
-It may happen because at the moment of *success* handler should be executed an URL of the page already has been changed. It means no any handlers anymore from the previous page which are still valid.
-
-
 ## Loading screen
 
 Rhodes supports the display of a custom "Loading" screen while your application is launching. This screen's source is the file loading.html, located at <application-root>/app/loading.html.
@@ -234,11 +176,11 @@ You can control how image presented by modifying splash_screen options in [rhoco
 
 Examples:
 
-Place the splash screen in the center and show it for 5 seconds: 
+Place splash screen in the center and show it for 5 seconds: 
 	:::ruby
 	splash_screen='delay=5;center'
 
-Center the splash screen horizontally, scale it vertically to file all available space, and show it for 5 seconds: 
+Center splash screen horizontally, scale it vertically to file all available space, and show it for 5 seconds: 
 	:::ruby
 	splash_screen='delay=5;hcenter;vzoom'
 
@@ -249,7 +191,7 @@ You can customize you loading image (showed on start of application) for each pl
 * WM `loading.wm.png`
 * BB `loading.bb.png`
 
-If application doesn't have platform specific `loading.png`, then Rhodes will try to load default `loading.png`.
+If application doesn't have platform specific `loading.png`, then Rhodes'll try to load default `loading.png`.
 
 For iPhone you may define a set of loading images. See Apple documentation about these images, [section Application Launch Images in Build-Time Configuration Details](http://developer.apple.com/library/ios/#documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/BuildTimeConfiguration/BuildTimeConfiguration.html).
 
@@ -304,8 +246,6 @@ Load from 'partials' folder:
 	
 ## Control WebView from controller actions
 It is possible to call on the WebView (browser) directly from your controllers. This API is recommended for use from callbacks, such as sync callback or camera callbacks.
-**NOTE: WebView do not support opening internet URLs required authentification. Use AsyncHTTP/AsyncHTTPS API for access to URL required authentification..
-
 
 Force WebView refresh current page
 	:::ruby
@@ -315,17 +255,15 @@ Force WebView refresh current page on tab with specified index. If no tab bar pr
 	:::ruby
 	WebView.refresh(index) 
 
-Force WebView to navigate to provided location (url)
+Force WebView navigate to provided location (url)
 	:::ruby
 	WebView.navigate(url) 
 	
-WebView.navigate supports an optional index parameter (defaults to 0, useful for tabbed applications)
+Since 1.2.2 WebView.navigate supports an optional index parameter (defaults to 0, useful for tabbed applications)
 	:::ruby
 	WebView.navigate(url, index)
 
-**NOTE: See [Important notes](#javascript-frameworks) section for details on possible issues with improper use of this method.
-
-Force WebView to navigate to previous page using Browser back
+Force WebView navigate to previouse page using Browser back
 	:::ruby
 	WebView.navigate_back
 
@@ -333,12 +271,12 @@ Get location (url) of the currently displayed page
 	:::ruby
 	WebView.current_location 
 
-The same as above, but for specified tab (if tab bar is present)	
+The same as above but for specified tab (if tab bar present)	
 	:::ruby
 	WebView.current_location(index) 
 
 Execute javascript string in the context of the currently displayed page. Supported on iPhone, Android, Windows Mobile and Blackberry 5.0 in full browser mode.
-Suppose that current page has the Javascript method:
+Suppose that current page has js method:
 	:::html
 	function test() {
 	    alert("Test");
@@ -353,9 +291,8 @@ The same as above but for specified tab (if tab bar present)
 	#call method test on the tab page 
 	WebView.execute_js("test();", index) 
 
-**NOTE: See [Important notes](#javascript-frameworks) section for details on possible issues with improper use of this method.
 
-Returns index of @tabs array for the currently selected tab
+Returns index of @tabs array for currently selected tab
 	:::ruby
 	WebView.active_tab 
 
@@ -363,7 +300,7 @@ Switch to/from full screen mode
 	:::ruby
 	WebView.full_screen_mode(enable)
 
-Set cookie is to be used by WebView to load a specified url. Each time WebView loads specified url (either by selecting link or as a result of calling WebView.navigate), it will add this cookie to the HTTP request. The cookie should be in format "NAME=VALUE, with multiple name/value pairs allowed. If more than one is set, they need to be split by semicolon: "NAME1=VALUE1; NAME2=VALUE2".
+Set cookie to be used by WebView for specified url. Each time when WebView load specified url (either by selecting link or in result of calling WebView.navigate), it will add this cookie to the HTTP request. Cookie should be in format "NAME=VALUE". Multiple name/value pairs allowed. In this case they need to be split by semicolon: "NAME1=VALUE1; NAME2=VALUE2".
 	:::ruby
 	WebView.set_cookie(url, cookie)
 
@@ -371,7 +308,7 @@ Set cookie is to be used by WebView to load a specified url. Each time WebView l
 See controller and view in the /app/Image folder of the [system API sample application](http://github.com/rhomobile/rhodes-system-api-samples/tree/master/app/Image/controller.rb#L30) for some of the examples of how to use WebView in the callbacks.
 
 ## Application Menu
-For platforms which support menus, Rhodes framework provides the ability to change the native application menu items through the following simple API:
+For platforms which support menus Rhodes framework provides ability to change the native application menu items through the following simple API:
 
 	:::ruby
 	@default_menu = { 
@@ -415,11 +352,6 @@ This will create a default menu with the following items (in top-down order):
 
 All of these menu items with the exception of "View Accounts" call a reserved menu item.  The "View Accounts" item will navigate to the path specified by the hash value, in this case /app/Account.
 
-To disable the Rhodes default menu, use an empty parameter list, as below.
-
-	:::ruby
-	@default_menu = {}
-
 ### Controller Action Menu
 To change the menu for a specific action (in controller.rb):
 
@@ -459,8 +391,6 @@ The following is the default Rhodes menu if none is provided in application.rb:
 Here is list of allowed values for actions for user defined menus, toolbars and tabbars:
 
 * :back - do back navigation using web view history or application's back url
-**NOTE: Android: when press Back on application Home page, application will go to background
-
 * :forward - do forward navigation
 * :home - navigate to configured start_path
 * :options - navigate to configured options_path
@@ -470,17 +400,12 @@ Here is list of allowed values for actions for user defined menus, toolbars and 
 * :separator - draw a separator line (if supported)
 * :close - close or put Rhodes to background (depending on platform)
 * :fullscreen - go to full screen mode
-* :copy_paste - enable copy\paste functionality (Blackberry only). System menu items are displayed:
-
-	    @default_menu = {
-	      "Copy_Paste" => :copy_paste, 
-        }
 
 Action can be also URL of user-defined controller method. URL can be prefixed with 'callback:' meaning it should be loaded by rhodes core, not WebView. This will effectively load specified url but in background, not touching UI. 
 
 Some examples:
 
-Calling of this action will be done by UI WebView component so the result of the do_that method will be rendered in UI
+Calling of this action will be done by UI WebView component so result of the do_that method will be rendered in UI
 	:::ruby
 	:action => url_for(:action => :do_that) 
 
@@ -498,14 +423,14 @@ The same as above but for another controller
 	
 ## Redefine back action
 
-Use the :back parameter in render:
+Use :back parameter in render:
 
 	:::ruby
 	render :action => :index, :back => 
 		url_for( :controller => :Settings, :action => :main_page )
 	render :back => '/app'
 
-Use :back with callback:
+Use back with callback:
 
 	:::ruby
 	render :action => :page_alert, :back => 
@@ -650,7 +575,7 @@ For the tabbar:
 	:::ruby
 	class AppApplication < Rho::RhoApplication
 	  def initialize
-	    # Tab items are loaded left->right, @tabs[0] is the leftmost tab in the tab-bar
+	    # Tab items are loaded left->right, @tabs[0] is leftmost tab in the tab-bar
 	    @tabs = [
 	      { :label => "Dashboard", :action => '/app', 
 			:icon => "/public/images/tabs/dashboard.png", :reload => true, :web_bkg_color => 0x7F7F7F }, 
@@ -698,7 +623,7 @@ Each tabbar item defined in the above sample defines the following tab elements:
 * :reload => true - (optional) tells rhodes to reload the tab's :action, default is false
 * :selected_color => 0xFFFF00 - (optional) change selected color of this tab (if you use it on Android, you should define it for all tabs, and also define :background_color for TabBar)
 * :disabled => true - (optional) disable this tab
-* :web_bkg_color = > hex value (0x7F7F7F for example) - background color for the tab (use when your app background is not white to remove the blink while switching tabs)
+* :web_bkg_color = > int hex value (0x7F7F7F for example) - background color for the tab (use when your app bkg is not white to remove blink when switching tabs)
 * :use_current_view_for_tab => true - (optional) tells rhodes to smooth transfer WebView from current view into this Tab and make this Tab active. Defaults to false. Only one Tab can have this parameter.
 
 
@@ -764,7 +689,7 @@ Set the iPhone badge to Tab (only on iOS devices).
 	# set badge '12' to tab 1
 	Rho::NativeTabbar.set_tab_badge( 1, '12')
 
-Rho::NativeTabbar.create() creates a native tab bar UI element and activates its first tab. If you want to see another tab, call Rho::NativeTabbar.switch_tab explicitly just after NativeBar.create, as in the following example.
+Rho::NativeTabbar.create() createa a native tab bar UI element and activates its first tab. If you want to see another tab, call Rho::NativeTabbar.switch_tab explicitly just after NativeBar.create, as in the following example.
 
 	:::ruby
 	require 'rho/rhotabbar'

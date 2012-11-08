@@ -19,8 +19,6 @@ void Barcode_executeRhoCallBackWithParams(NSString* callbackURL,
     NSString* str3Name, NSString* str3Value,
     NSString* dataName, NSData* dataValue
 );
-    
-void Barcode_executeEnumerateCallback(NSString* url);    
 
 #ifdef __cplusplus
 }

@@ -2,12 +2,9 @@
 
 module Crypt
 module CBC
- 
+  
   require 'crypt/stringio'
-  if defined?( RHO_WP7 ) 
-    require 'stringio' 
-  end  
-  require 'crypt/stringxor' 
+  require 'crypt/stringxor'
   
   ULONG = 0x100000000
   

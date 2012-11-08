@@ -422,8 +422,7 @@ end
                     raise
                 end                
                 
-                ::Rho::RHO.init_sync_source_properties(Rho::RhoConfig::sources().values())
-				#puts "sources after: #{Rho::RhoConfig::sources()}"            
+                #puts "sources after: #{Rho::RhoConfig::sources()}"            
                 return
             end
         rescue Exception => e
@@ -596,21 +595,18 @@ end
     end
 
     def self.init_sync_source_properties(uniq_sources)
-
         uniq_sources.each do|src|
             ['pass_through', 'full_update'].each do |prop|
-                next unless src.has_key?(prop)
+                next unless src.has_key?(prop)        
                 SyncEngine.set_source_property(src['source_id'], prop, src[prop] ? src[prop].to_s() : '' )
             end            
         end
         
         uniq_sources.each do|src|
             if src.has_key?('freezed') || !src['schema'].nil?
-				hash_props = !src['schema'].nil? ? src['schema']["property"] : src["property"]
-				if (!hash_props.nil?)
-					str_props = hash_props.keys.join(',')
-					SyncEngine.set_source_property(src['source_id'], 'freezed', str_props )
-				end
+                hash_props = !src['schema'].nil? ? src['schema']["property"] : src["property"]
+                str_props = hash_props.keys.join(',')
+                SyncEngine.set_source_property(src['source_id'], 'freezed', str_props )
             end            
         end
         
@@ -681,17 +677,7 @@ end
             call_migrate = true 
           end
           
-			strCreate = make_createsql_script(source['name'], source['schema'])
-			
-			#puts "source['schema'] :  #{source['schema']}"
-			#hashSchema = Rho::JSON.parse(source['schema'])
-			#puts "hashSchema :  #{hashSchema}"
-			
-			#src['schema'] = hashSchema
-			#source['schema']['sql'] = strCreate
-			#src['schema_version'] = hashSchema['version']
-			#strCreate = source['schema']
-			#puts "strCreate: #{strCreate}"
+          strCreate = make_createsql_script(source['name'], source['schema'])
         
           if call_migrate
             db.update_into_table('sources', {"schema"=>strCreate},{"name"=>source['name']})
@@ -876,8 +862,6 @@ end
     
     def serve(req)
       begin
-        RhoProfiler.start_counter('CTRL_ACTION')            
-      
         puts "RHO serve: " + (req ? "#{req['request-uri']}" : '')
         res = init_response
         get_app(req['application']).send :serve, req, res
@@ -885,21 +869,14 @@ end
         init_nativebar
         Rho::RhoController.clean_cached_metadata()
         Rho::RhoConfig.clean_cached_changed
-        ret = send_response(res)
-        RhoProfiler.stop_counter('CTRL_ACTION') 
-        return ret
+        return send_response(res)
       rescue Exception => e
-        ret = send_error(e)
-        RhoProfiler.stop_counter('CTRL_ACTION') 
-        return ret
-      ensure
-        RhoApplication::set_current_controller(nil)
-      end
+        return send_error(e)
+      end   
     end
 
     def serve_hash(req)
       begin
-        RhoProfiler.start_counter('CTRL_ACTION')            
         puts "RHO serve: " + (req ? "#{req['request-uri']}" : '')
         res = init_response
         get_app(req['application']).send :serve, req, res
@@ -907,26 +884,16 @@ end
         init_nativebar
         Rho::RhoController.clean_cached_metadata()
         Rho::RhoConfig.clean_cached_changed
-        ret = send_response_hash(res)
-        RhoProfiler.stop_counter('CTRL_ACTION') 
-        return ret
+        return send_response_hash(res)
       rescue Exception => e
-        ret = send_error(e,500,true)
-        RhoProfiler.stop_counter('CTRL_ACTION') 
-        return ret
-      ensure
-        RhoApplication::set_current_controller(nil)
-      end
-      
+        return send_error(e,500,true)
+      end 
     end
     
     def serve_index(index_name, req)
-      begin
-        RhoProfiler.start_counter('INDEX_ACTION')            
-      
     	# TODO: Removed hardcoded appname
     	get_app(APPNAME).set_menu
-      
+      begin
         puts "RHO serve_index: " + (req ? "#{req['request-uri']}" : '')
         res = init_response
         res['request-body'] = RhoController::renderfile(index_name, req, res)
@@ -934,23 +901,16 @@ end
         init_nativebar
         Rho::RhoController.clean_cached_metadata()
         Rho::RhoConfig.clean_cached_changed
-        ret = send_response(res)
-        RhoProfiler.stop_counter('INDEX_ACTION')            
-        return ret
+        return send_response(res)
       rescue Exception => e
-        ret = send_error(e)
-        RhoProfiler.stop_counter('INDEX_ACTION')            
-        return ret
+        return send_error(e)
       end
     end
 
     def serve_index_hash(index_name, req)
-      begin
-        RhoProfiler.start_counter('INDEX_ACTION')            
-      
     	# TODO: Removed hardcoded appname
     	get_app(APPNAME).set_menu
-      
+      begin
         puts "RHO serve_index: " + (req ? "#{req['request-uri']}" : '')
         res = init_response
         res['request-body'] = RhoController::renderfile(index_name, req, res)
@@ -958,14 +918,9 @@ end
         init_nativebar
         Rho::RhoController.clean_cached_metadata()
         Rho::RhoConfig.clean_cached_changed
-        ret = send_response_hash(res)
-        RhoProfiler.stop_counter('INDEX_ACTION')            
-        return ret
-        
+        return send_response_hash(res)
       rescue Exception => e
-        ret = send_error(e, 500, true)
-        RhoProfiler.stop_counter('INDEX_ACTION')            
-        return ret
+        return send_error(e, 500, true)
       end
     end
 
@@ -1393,24 +1348,3 @@ module Kernel
     end
     
 end    
-
-if !defined?(RHO_WP7) && !defined?( RHO_ME )
-module WebView
-
-    class << self
-        alias_method :orig_execute_js, :execute_js
-    end
-
-    def self.execute_js(func, index = -1, vals = nil)
-        if (vals && 0 < vals.size)
-            func += '('
-            vals.each do |val|
-                func += val
-                func += ',' if val != vals.last
-            end
-            func += ');'
-        end
-       orig_execute_js(func, index)                
-    end
-end
-end

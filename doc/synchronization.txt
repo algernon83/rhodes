@@ -144,21 +144,8 @@ These parameters are included in all notifications.
 * `@params["cumulative_count"]` - Number of records the `SyncEngine` has processed so far for this source.
 
 #### "in_progress" - bulk sync
-* `@params["bulk_status"]` - The state of the bulk sync process: 
+* `@params["bulk_status"]` - The state of the bulk sync process: "start", "download", "change_db".
 
- "start": when bulk sync start and when specific partition is start syncing
- 
- "download": when client start downloading database from server
- 
- "change_db": when client start applying new database
-
- "blobs": when client start downloading remote blob files
- 
- "ok": when sync of partition finished without error
- 
- "complete": when bulk sync finished for all partitions without errors
- 
-* `@params["partition"]` - Current bulk sync partition.
 
 #### "error"
 * `@params["error_code"]` - HTTP response code of the RhoConnect server error: 401, 500, 404, etc.
@@ -495,9 +482,9 @@ Returns 1 if the `SyncEngine` currently has a user session, 0 if not.
 	  render :action => :login
 	end
 
-### `dosync(show_sync_status = true, query_params = "", sync_only_sources_with_local_changes = false )`
+### `dosync(show_sync_status = true, query_params = "")`
 Start the `SyncEngine` process and display an optional status popup (defaults to true).
-query_params will pass to sync server. sync_only_sources_with_local_changes indicates that only sources that have local changes will be synced.
+query_params will pass to sync server
 
 	:::ruby
 	SyncEngine.dosync(false)
@@ -505,9 +492,6 @@ query_params will pass to sync server. sync_only_sources_with_local_changes indi
 
 	SyncEngine.dosync(false, "param1=12&param2=abc")
 	  #=> no status popups are displayed and parameters will pass to sync server
-
-	SyncEngine.dosync(false, "", true)
-	  #=> no status popups are displayed and synchronization will be performed only for sources with local changes.
 
 ### `dosync_source(source_id_or_name, show_sync_status = true, query_params = "")`
 Star the `SyncEngine` process for a given source id or source name and display an optional status popup (defaults to true).
@@ -694,13 +678,3 @@ For example:
 Parameters are the same as for ModelName.search with an additional parameter:
 
 * `:source_names` - Sends a list of source adapter names to RhoConnect to search across.
-
-## SyncEngine AJAX API
-[Sync engine AJAX API](syncengine-ajax-api) has been implemented to provide access to low-level control on
-synchronization process right from plain HTML/javascript UI pages.
-
-It isn't intended to be used in every application. It requires deep knowledge of SyncEngine functionality and operations.
-It may broke your application if used improperly so use it with care please.
-
-## Backround synchronization on iOS
-On iOS, if application is put to background, it will be suspended. To allow application finish sync after application goes to background, you can use 'finish_sync_in_background' parameter in [`rhoconfig.txt`](/rhodes/configuration). When this parameter is set to '1', if sync is active in the time of background transition ( e.g. started from app_deactivate handler ), application will not be suspended until sync is finished.

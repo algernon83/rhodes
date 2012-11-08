@@ -257,7 +257,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				COPY_PHASE_STRIP = NO;
 				DSTROOT = /tmp/Barcode.dst;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -286,7 +289,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = Barcode;
 				SDKROOT = iphoneos;
-				VALID_ARCHS = "i386 armv7";
+				VALID_ARCHS = "i386 armv6 armv7";
 			};
 			name = Debug;
 		};
@@ -294,7 +297,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				DSTROOT = /tmp/Barcode.dst;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -319,7 +325,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = Barcode;
 				SDKROOT = iphoneos;
-				VALID_ARCHS = "i386 armv7";
+				VALID_ARCHS = "i386 armv6 armv7";
 			};
 			name = Release;
 		};

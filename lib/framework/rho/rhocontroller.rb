@@ -32,27 +32,28 @@ module Rho
   class RhoController
   	attr_accessor :menu
 
+    @@rholog = RhoLog.new
     @@before = nil
     def rho_info(str)
-      RhoLog.info("RHO " + self.class.to_s, str)
+      @@rholog.info("RHO " + self.class.to_s, str)
     end
 
     def rho_error(str)
-      RhoLog.error("RHO " + self.class.to_s, str)
+      @@rholog.error("RHO " + self.class.to_s, str)
     end
 
     def app_info(str)
-      RhoLog.info("APP " + self.class.to_s, str)
+      @@rholog.info("APP " + self.class.to_s, str)
     end
 
     def app_error(str)
-      RhoLog.error("APP " + self.class.to_s, str)
+      @@rholog.error("APP " + self.class.to_s, str)
     end
 
     def default_action
       return Hash['GET','show','PUT','update','POST','update',
-        'DELETE','delete'][@request['request-method'].upcase] unless @request['id'].nil?
-      return Hash['GET','index','POST','create'][@request['request-method'].upcase]
+        'DELETE','delete'][@request['request-method']] unless @request['id'].nil?
+      return Hash['GET','index','POST','create'][@request['request-method']]
     end
 
     def self.process_rho_object(params)
@@ -60,21 +61,7 @@ module Rho
         hashObjs = params['__rho_object']
         
         hashObjs.each do |name,index|
-            if name == '__rho_inline'
-                params.merge!( __rhoGetCallbackObject(index.to_i()) )
-                
-                barcodeModule = Object.const_get('Barcode') if Object.const_defined?('Barcode')
-                if barcodeModule && barcodeModule.respond_to?( :rho_process_moto_callback )
-                    barcodeModule.rho_process_moto_callback(params)
-                end
-                cameraModule = Object.const_get('Camera') if Object.const_defined?('Camera')
-                if cameraModule && cameraModule.respond_to?( :rho_process_moto_callback )
-                    cameraModule.rho_process_moto_callback(params)
-                end
-                
-            else
-                params[name] = __rhoGetCallbackObject(index.to_i())
-            end    
+            params[name] = __rhoGetCallbackObject(index.to_i())
         end
         
         params.delete('__rho_object')
